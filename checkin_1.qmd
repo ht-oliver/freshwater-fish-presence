@@ -95,3 +95,4 @@ ggplot(richness_w_temp, aes(x = mean_air_temp, y = richness)) +
 
 ```
 
+This figure helps investigate my hypothesis that air temperature has an effect on freshwater fish species richness in northern central America lakes and streams. At a glance, this figure shows that air temperatures which are more distant from the mean air temp (~16.8 degrees C) are associated with lower richness. But this could be for many reasons - I think my next step will be to brainstorm how else I can associate fish counts with air temperature.
