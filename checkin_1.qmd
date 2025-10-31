@@ -20,7 +20,7 @@ fish_raw <- read_csv(here("data","StreamSpeciesDataset_v1_1_3_edited.csv")) %>%
 
 
 ```{r}
-# Pivot longer
+# Pivot longer so that each species has it's own row
 fish_long <- pivot_longer(fish_raw,
                           cols = c("bct", "crct", "crrb", "eb",
                                   "ll", "bull", "gr", "onc",
