@@ -1,0 +1,97 @@
+---
+title: "Freshwater Fish Presence in Wyoming, Idaho and Montana (1800-2022)"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+
+```
+
+
+
+```{r}
+fish_raw <- read_csv(here("data","StreamSpeciesDataset_v1_1_3_edited.csv")) %>% 
+  clean_names() %>% 
+  select(!c('gear', 'database', 'party'))
+```
+
+
+```{r}
+# Pivot longer
+fish_long <- pivot_longer(fish_raw,
+                          cols = c("bct", "crct", "crrb", "eb",
+                                  "ll", "bull", "gr", "onc",
+                                  "tgt", "spk", "srct", "wct",
+                                  "yct", "cut", "cis", "lwf",
+                                  "gt", "rb", "kok", "pwf",
+                                  "mwf", "lt", "lmb", "smb",
+                                  "bg", "pump", "gsun", "blcr",
+                                  "whcr", "wbs", "rkb", "nrbdc",
+                                  "bmsh", "cmsh", "lsch", "rdsh",
+                                  "rtch", "lkch", "hhch", "gila",
+                                  "smmn", "wsmn", "brmn", "plmn",
+                                  "ws_plmn", "stch", "fsdc", "sfch",
+                                  "npdc", "str", "pea", "gsh",
+                                  "emsh", "spsh", "sdsh", "fhmn",
+                                  "fhch", "spdc", "lndc", "rssh",
+                                  "crch", "gdf", "carp", "blbh", 
+                                  "ylbh", "ccat", "scat", "ling",
+                                  "drum", "gar", "pkf", "ptmn",
+                                  "ge", "pf", "iowa", "jdt",
+                                  "odt", "yp", "sgr", "we",
+                                  "np", "tim", "rmcot", "mcot",
+                                  "colcot", "pcot", "slcot", "tcot",
+                                  "spcot", "cfcot", "rbsm", "brsb",
+                                  "wstrg", "pstrg", "sstrg", "rcsu",
+                                  "lnsu", "wsu", "lssu", "mtsu",
+                                  "plsu", "bsu", "smbuf", "bmbuf",
+                                  "bhsu", "gsu", "b_hx_wsu", "fmsu",
+                                  "f_mx_bhsu", "f_mx_wsu", "utsu", "qbk",
+                                  "shrh", "trpr", "gam", "gzs"
+                                  ),
+                          names_to = "species_0",
+                          values_to = "present_0")
+
+```
+
+
+```{r}
+
+# Get fish species in August
+august_fish <- fish_long %>% 
+  filter(month == "8") %>% # Filter to august
+  group_by(species_0, year) %>%  # Group by species and year
+  summarize(present_0 = as.integer(any(present_0 == 1)), .groups = "drop") #Ensure there is only one "present_0" reading per species per year
+
+richness <- august_fish %>% 
+  group_by(year) %>% 
+  summarise(richness = sum(present_0))
+
+# Get air temps for august
+air_temp <- fish_long %>%
+  group_by(year) %>% # Group by year
+  summarise(mean_air_temp = mean(air_aug, na.rm = TRUE)) # Get mean temp for august
+
+# Join air temp and fish richness
+richness_w_temp <- richness %>% 
+  left_join(air_temp, by = "year")
+
+
+
+```
+
+
+```{r}
+
+ggplot(richness_w_temp, aes(x = mean_air_temp, y = richness)) +
+  geom_point() +
+  labs(title = "Species richness a function of mean August air temperature",
+       subtitle = "Montana, Idaho and Wyoming rivers and streams (1800 - 2022)") +
+  theme_classic()
+
+
+```
+
